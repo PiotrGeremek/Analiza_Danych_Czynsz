@@ -92,6 +92,9 @@ boxplot(wynajem_pdst$collegeDistance)
 boxplot(wynajem_pdst$pharmacyDistance)
 boxplot(wynajem_pdst$price)
 
+summary(wynajem_pdst)
+
+
 
 
 ## zrobic jeszcez ODSTAJACE OBSERWACJE jakos inaczej??
