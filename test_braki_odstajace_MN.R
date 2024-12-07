@@ -1,7 +1,7 @@
 wynajem_pdst <- read.csv("apartments_rent_pl_2024_06.csv")
 
 #Instalowanie wymaganych pakietów do wizualizacji braków
-install.packages(c("tidyverse", "dlookr", "editrules", "VIM", "deducorrect", "ISLR","naniar","visdat"))
+install.packages(c("tidyverse", "dlookr", "editrules", "VIM", "deducorrect", "ISLR","naniar","visdat","Amelia"))
 
 #Ładowanie instalowanych pakietów
 library(tidyverse)
@@ -15,7 +15,7 @@ library(visdat)
 library(ggplot2)
 library(mice)
 library(finalfit)
-
+library(Amelia)
 
 
 
@@ -69,8 +69,31 @@ gg_miss_upset(wynajem_pdst,
               nsets = 10) #wspolwystepowanie NA
 gg_miss_upset(wynajem_pdst)
 vis_dat(wynajem_pdst)
+missmap(wynajem_pdst)
+md.pattern(wynajem_pdst)
 
 
-## zrobic jeszcez ODSTAJACE OBSERWACJE!!
-## jeszcze jakies zaleznosci miedzy tymi zmiennymi mamy poszukac?
+# Obserwacje odstjace - boxploty
+boxplot(wynajem_pdst$squareMeters)
+boxplot(wynajem_pdst$rooms)
+boxplot(wynajem_pdst$floor)
+boxplot(wynajem_pdst$floorCount)
+boxplot(wynajem_pdst$buildYear)
+boxplot(wynajem_pdst$latitude)
+boxplot(wynajem_pdst$longitude)
+boxplot(wynajem_pdst$centreDistance)
+boxplot(wynajem_pdst$poiCount)
+boxplot(wynajem_pdst$schoolDistance)
+boxplot(wynajem_pdst$clinicDistance)
+boxplot(wynajem_pdst$postOfficeDistance)
+boxplot(wynajem_pdst$kindergartenDistance)
+boxplot(wynajem_pdst$restaurantDistance)
+boxplot(wynajem_pdst$collegeDistance)
+boxplot(wynajem_pdst$pharmacyDistance)
+boxplot(wynajem_pdst$price)
+
+
+
+## zrobic jeszcez ODSTAJACE OBSERWACJE jakos inaczej??
+## jeszcze jakies zaleznosci miedzy tymi zmiennymi mamy poszukac???
 
