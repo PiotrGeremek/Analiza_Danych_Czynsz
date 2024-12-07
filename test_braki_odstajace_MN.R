@@ -92,11 +92,6 @@ boxplot(wynajem_pdst$collegeDistance)
 boxplot(wynajem_pdst$pharmacyDistance)
 boxplot(wynajem_pdst$price)
 
+# Sprawdzam jeszcze odstajace dane za pomoca min max
 summary(wynajem_pdst)
-
-
-
-
-## zrobic jeszcez ODSTAJACE OBSERWACJE jakos inaczej??
-## jeszcze jakies zaleznosci miedzy tymi zmiennymi mamy poszukac???
 
