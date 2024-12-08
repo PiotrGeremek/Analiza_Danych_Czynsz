@@ -126,8 +126,10 @@ reguly <- editset(c(
   "floor>=0",
   "rooms>0",
   "squareMeters>0",
-  "buildYear>0", #czy wiecej
-  # co z ltitude, longitude, poiCOunt
+  "buildYear>0",
+  "poiCount>=0",
+  "latitude>=0",
+  "longitude>=0"
 ))
 
 # walidacja i wykresik
@@ -139,13 +141,8 @@ plot(bledy)
 # jesli by byly bledy
 # dane[localizeErrors(reguly, dane$adapt)] <- NA
 
-
-# 1. zapytac sie piotrek co o reszcie tyhc regul jak je potraktowac
-# 2. sprawdzic czy dalej nie ma bledow
-# 3. commit to i koljene co sie zajmowac danymi imputacja - zmeinic premium na not premium i zobaczyc ile bledow zostanie
-# 4. potem imputacja ta 4 metoda np
-# 5. sprawdzic jak tam dane i dalej zmieniac yes no na 1 0, kategorie jakies tez moze na cos
-# Ogolnie miec te dane ladne czyszte na kolejen zajecia na wizualizacje!!
+# Sprawdzamy jeszcze czy np w city nie mamy jakis dziwnych miast, innaczej zapisanych itd
+unique(wynajem_pdst$city)
 
 
 # Zamieniami w condition puste na "non_premium+
@@ -178,6 +175,12 @@ vis_dat(wynajem_pdst)
 missmap(wynajem_pdst)
 md.pattern(wynajem_pdst)
 
+# PRZY ROBIENIU JUZ MARKDOWN - wszystkie biblioteki dodac i wczytac gdzies na starcie!!!!
 
-# potem imputacja (jak miasto to dodajemy regule jakie mamy miasta):
-# miasto %in% c("Szczecin", "Gdansk",...). (to jest regula dla jakosciowych danych)
+#impuracja brakow danych
+#library(VIM)
+#czyste_dane <- hotdeck(dane)
+
+# 1. potem imputacja ta 4 metoda np
+# 2. sprawdzic jak tam dane i dalej zmieniac yes no na 1 0, kategorie jakies tez moze na cos
+# Ogolnie miec te dane ladne czyszte na kolejen zajecia na wizualizacje!!
