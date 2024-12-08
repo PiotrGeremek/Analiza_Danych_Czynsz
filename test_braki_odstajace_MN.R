@@ -139,3 +139,10 @@ plot(bledy)
 # jesli by byly bledy
 # dane[localizeErrors(reguly, dane$adapt)] <- NA
 
+
+# 1. zapytac sie piotrek co o reszcie tyhc regul jak je potraktowac
+# 2. sprawdzic czy dalej nie ma bledow
+# 3. commit to i koljene co sie zajmowac danymi imputacja - zmeinic premium na not premium i zobaczyc ile bledow zostanie
+# 4. potem imputacja ta 4 metoda np
+# 5. sprawdzic jak tam dane i dalej zmieniac yes no na 1 0, kategorie jakies tez moze na cos
+# Ogolnie miec te dane ladne czyszte na kolejen zajecia na wizualizacje!!
