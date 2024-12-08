@@ -153,7 +153,30 @@ plot(bledy)
 wynajem_pdst$condition[is.na(wynajem_pdst$condition)] <- "non_premium"
 print(wynajem_pdst)
 
-# Teraz jeszcze raz sprawdzamy braki danych
+## Teraz jeszcze raz sprawdzamy braki danych
+n_miss(wynajem_pdst)
+# Teraz mamy tylko 9433
+
+#Czyli ok 3,8% zamiast 6,36%
+prop_miss(wynajem_pdst)
+
+miss_var_summary(wynajem_pdst)
+# buildingMaterial 39,6% brakow danych, buildYear 25,4%, type 20,7%, floor 11,9% ... 
+
+#Wedlug wieszy - ile obserwacji w kazdym z wierszy jest brakujacych (np. tylko w 1 wierszu jest 8 brakujacyhc obserwacji)
+wynajem_pdst %>% 
+  miss_case_table()
+
+#Wizualizacje
+vis_miss(wynajem_pdst)
+vis_miss(wynajem_pdst, sort = TRUE) #braki posortowane
+gg_miss_fct(wynajem_pdst, fct = city) #braki w zaleznosci od miasta
+gg_miss_upset(wynajem_pdst, 
+              nsets = 10) #wspolwystepowanie NA
+gg_miss_upset(wynajem_pdst)
+vis_dat(wynajem_pdst)
+missmap(wynajem_pdst)
+md.pattern(wynajem_pdst)
 
 
 # potem imputacja (jak miasto to dodajemy regule jakie mamy miasta):
