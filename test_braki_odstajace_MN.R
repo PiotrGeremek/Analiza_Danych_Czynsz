@@ -1,7 +1,7 @@
 wynajem_pdst <- read.csv("apartments_rent_pl_2024_06.csv")
 
 #Instalowanie wymaganych pakietów do wizualizacji braków
-install.packages(c("tidyverse", "dlookr", "editrules", "VIM", "deducorrect", "ISLR","naniar","visdat","Amelia"))
+install.packages(c("tidyverse", "dlookr", "editrules", "VIM", "deducorrect", "ISLR","naniar","visdat","Amelia","validate"))
 
 #Ładowanie instalowanych pakietów
 library(tidyverse)
@@ -94,4 +94,48 @@ boxplot(wynajem_pdst$price)
 
 # Sprawdzam jeszcze odstajace dane za pomoca min max
 summary(wynajem_pdst)
+
+
+## MUSIMY ZROBIC IMPUTACJE DANYCH!!! - to jako rozdzial (powinnismy miec znaleznione, narysowane i uzupelnione dane)
+## no i po imputacji te reguly i bledy zaminiec na NA
+# ewentualnie wtorna imputacja potem
+
+
+# reguly - to co pokazuje na zajeciach
+library(tidyverse)
+library(dlookr)
+library(editrules) #reguly
+library(VIM)
+library(validate)
+attach(wynajem_pdst)
+
+# jak wiele regul mozemy pisac w pliku tekstoweym i zalaczyc lub pisac tutaj
+
+# reguly: (przed imputacja)
+reguly <- editset(c(
+  "price>0",
+  "pharmacyDistance>0",
+  "collegeDistance>0",
+  "restaurantDistance>0",
+  "kindergartenDistance>0",
+  "postOfficeDistance>0",
+  "clinicDistance>0",
+  "schoolDistance>0",
+  "floorCount>=0",
+  "centreDistance>0",
+  "floor>=0",
+  "rooms>0",
+  "squareMeters>0",
+  "buildYear>0", #czy wiecej
+  # co z ltitude, longitude, poiCOunt
+))
+
+# walidacja i wykresik
+summary(violatedEdits(reguly,wynajem_pdst))
+bledy <- violatedEdits(reguly,wynajem_pdst)
+plot(bledy)
+
+#mamy 0 błedów - nic nie musimy zamieniac na NA, nie robimy ponownej imputacji
+# jesli by byly bledy
+# dane[localizeErrors(reguly, dane$adapt)] <- NA
 
