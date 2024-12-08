@@ -146,3 +146,15 @@ plot(bledy)
 # 4. potem imputacja ta 4 metoda np
 # 5. sprawdzic jak tam dane i dalej zmieniac yes no na 1 0, kategorie jakies tez moze na cos
 # Ogolnie miec te dane ladne czyszte na kolejen zajecia na wizualizacje!!
+
+
+# Zamieniami w condition puste na "non_premium+
+# Przed tym mielismy 15762 NA
+wynajem_pdst$condition[is.na(wynajem_pdst$condition)] <- "non_premium"
+print(wynajem_pdst)
+
+# Teraz jeszcze raz sprawdzamy braki danych
+
+
+# potem imputacja (jak miasto to dodajemy regule jakie mamy miasta):
+# miasto %in% c("Szczecin", "Gdansk",...). (to jest regula dla jakosciowych danych)
