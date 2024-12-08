@@ -178,9 +178,17 @@ md.pattern(wynajem_pdst)
 # PRZY ROBIENIU JUZ MARKDOWN - wszystkie biblioteki dodac i wczytac gdzies na starcie!!!!
 
 #impuracja brakow danych
-#library(VIM)
-#czyste_dane <- hotdeck(dane)
+library(VIM)
+czyste_dane <- hotdeck(wynajem_pdst)
+print(czyste_dane)
 
-# 1. potem imputacja ta 4 metoda np
-# 2. sprawdzic jak tam dane i dalej zmieniac yes no na 1 0, kategorie jakies tez moze na cos
+# Czy na pewno nie mamy brakow danych - NIE MAMY
+n_miss(czyste_dane)
+vis_miss(czyste_dane)
+
+
+
+# sprawdzic jak tam dane i dalej zmieniac yes no na 1 0, kategorie jakies tez moze na cos
 # Ogolnie miec te dane ladne czyszte na kolejen zajecia na wizualizacje!!
+
+
