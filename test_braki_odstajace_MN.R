@@ -191,4 +191,5 @@ vis_miss(czyste_dane)
 # sprawdzic jak tam dane i dalej zmieniac yes no na 1 0, kategorie jakies tez moze na cos
 # Ogolnie miec te dane ladne czyszte na kolejen zajecia na wizualizacje!!
 
+write.csv(czyste_dane, "oczyszczone_dane.csv", row.names = FALSE)
 
