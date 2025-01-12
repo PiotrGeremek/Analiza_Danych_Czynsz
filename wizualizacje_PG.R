@@ -1,5 +1,7 @@
 dane_do_wiz <- read.csv("oczyszczone_dane.csv")
 library(ggplot2)
+library(GGally)
+library(dplyr)
 library(plotly)
 
 ## Powodzenia z przeklikiwaniem
@@ -366,4 +368,14 @@ ggplot(dane_do_wiz, aes(x = squareMeters, y = price)) +
     ) +
     theme_minimal()
   
+  ## Heatmap'a korelacji zmiennych (pogadać o tym jaki jest sens tworzenia niektórych wykresów)
+  ggcorr(
+    data = dane_do_wiz %>% select(where(is.numeric)),
+    method = c("pairwise.complete.obs", "pearson"),
+    label = TRUE
+  ) +
+    theme(
+      axis.text.x = element_text(hjust = 1),  # Przesunięcie etykiet na osi X
+      axis.text.y = element_text(hjust = 1)   # Przesunięcie etykiet na osi Y
+    )
   
