@@ -76,3 +76,37 @@ table1(~ rooms + price + squareMeters | city, data = dane_do_statystyk)
 ### cooler 
 print(table1(~ rooms + price + squareMeters | city, data = dane_do_statystyk), method = "browser")
 
+
+
+
+# Robię funkcje żeby zmieniać statystyki względem miast w zależności od róznych zmiennych (ogólnie przy 1-6 jak przy pokojach to troche czytelnosc kuleje ale podoba mi sie ze od razu robi te dane dla wszystkich miast, jak dla mnie giga rzecz, polecam, jak cos chcesz to po prostu zmieniasz 2 argument funkcji kalkulacje_stat)
+
+
+kalkulacje_stat <- function(data, group_var) {
+  data %>%
+    group_by(city, {{ group_var }} ) %>%
+    summarise(
+      n = n(),
+      mean = mean(price, na.rm = TRUE),
+      median = median(price, na.rm = TRUE),
+      sd = sd(price, na.rm = TRUE),
+      var = var(price, na.rm = TRUE),
+      coeff_var = (sd / mean) * 100,
+      skewness = skewness(price, na.rm = TRUE),
+      kurtosis = kurtosis(price, na.rm = TRUE),
+      IQR = IQR(price, na.rm = TRUE),
+      sx = IQR / 2,
+      coeff_varx = (sx / median) * 100,
+      min = min(price, na.rm = TRUE),
+      max = max(price, na.rm = TRUE),
+      q10 = quantile(price, 0.1, na.rm = TRUE),
+      q25 = quantile(price, 0.25, na.rm = TRUE),
+      q50 = quantile(price, 0.5, na.rm = TRUE),
+      q75 = quantile(price, 0.75, na.rm = TRUE),
+      q95 = quantile(price, 0.95, na.rm = TRUE)
+    ) %>%
+    rename(group_value = {{ group_var }} )
+}
+
+
+print(kalkulacje_stat(dane_do_statystyk, type), n = 75)
