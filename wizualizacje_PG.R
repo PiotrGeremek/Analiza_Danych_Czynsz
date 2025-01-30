@@ -4,15 +4,15 @@ library(GGally)
 library(dplyr)
 library(plotly)
 
-## nie zrobiliśmy tego a powinniśmy - zmiana wartości yes i no, na 1 i 0
+## nie zrobiliśmy tego a powinniśmy - zmiana wartości yes i no, na TRUE i FALSE
 
 dane_do_wiz <- dane_do_wiz %>%
-  mutate(
-    hasParkingSpace = ifelse(hasParkingSpace == "yes", 1, 0),
-    hasBalcony = ifelse(hasBalcony == "yes", 1, 0),
-    hasElevator = ifelse(hasElevator == "yes", 1, 0),
-    hasSecurity = ifelse(hasSecurity == "yes", 1, 0),
-    hasStorageRoom = ifelse(hasStorageRoom == "yes", 1, 0)
+  mutate(  
+    hasParkingspace = ifelse(hasParkingSpace == "yes", TRUE, FALSE),  
+    hasBalcony = ifelse(hasBalcony == "yes", TRUE, FALSE),  
+    hasElevator = ifelse(hasElevator == "yes", TRUE, FALSE),  
+    hasSecurity = ifelse(hasSecurity == "yes", TRUE, FALSE),
+    hasStorageRoom = ifelse(hasStorageRoom == "yes", TRUE, FALSE)
   )
 
 ### Jeszcze a propos tego opisu to musimy spojrzeć na kursie na pliki i zobaczyć czy czymś się tam jeszcze zainspirować
