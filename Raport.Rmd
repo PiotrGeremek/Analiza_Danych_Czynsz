@@ -1,29 +1,48 @@
 ---
-title: "Raport"
-output: html_document
-date: "2024-11-24"
+title: "Czynsz za mieszkania w Polsce"
+author: "Miriam Nieslona, Piotr Geremek"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r Instalacja_pakietow, include=FALSE}
+#Instalacja pakietów 
+
+options(repos = c(CRAN = "https://cloud.r-project.org/"))
+install.packages(c("rmdformats", "tidyverse", "dlookr", "editrules", "VIM", "deducorrect", "ISLR", "naniar", "visdat", "Amelia", "validate", "ggplot2", "mice", "finalfit", "GGally", "dplyr", "plotly", "gtsummary", "glue", "arsenal", "qwraps2", "table1", "moments", "ggstatsplot"))
+library(rmdformats)
+library(tidyverse)
+library(dlookr)
+library(editrules)
+library(VIM)
+library(deducorrect)
+library(ISLR) 
+library(naniar)
+library(visdat)
+library(Amelia)
+library(validate)
+library(ggplot2)
+library(mice)
+library(finalfit)
+library(GGally)
+library(dplyr)
+library(plotly)
+library(gtsummary)
+library(glue)
+library(arsenal)
+library(qwraps2)
+library(table1)
+library(moments)
+library(ggstatsplot)
 ```
 
-## R Markdown
+# *Wstęp*
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Opis problemu
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+działa git
