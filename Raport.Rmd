@@ -51,7 +51,7 @@ Celem raportu jest analiza czynników wpływających na wysokość czynszu w naj
 
 ```{r wczytywanie_danych, include=FALSE}
 knitr::opts_chunk$set(cache = TRUE)
-wynajem_pdst <- read.csv("apartments_rent_pl_2024_06.csv")
+wynajem_pdst_raw <- read.csv("apartments_rent_pl_2024_06.csv")
 ```
 
 Podstawą naszej analizy będzie obszerna baza danych dotycząca mieszkań na wynajem, która zawiera szczegółowe informacje o poszczególnych ofertach.
@@ -73,3 +73,140 @@ Nasza baza danych obejmuje takie informacje jak:
 -   **Cena wynajmu** – czynsz podany w złotych.
 
 # *Standaryzacja i przygotowanie danych do analizy*
+
+## Braki danych
+
+Zamieniamy puste wartosći na "NA"
+
+```{r na, echo=TRUE}
+wynajem_pdst_raw[wynajem_pdst_raw == ''] <- NA
+```
+
+Sprawdzamy ile mamy braków danych
+
+```{r ile_brakow, echo=TRUE}
+n_miss(wynajem_pdst_raw)
+```
+
+Sprawdzamy jaki % naszych danych, to braki danych
+
+```{r %barakow, echo=TRUE}
+prop_miss(wynajem_pdst_raw)
+```
+
+Warto sprawdzić, w przypadku jakiej zmiennej występuję najwięcej braków
+
+```{r gdzie_na, echo=TRUE}
+miss_var_summary(wynajem_pdst_raw)
+```
+
+Jak widać, w "condition" wystepuje aż 71,5% braków danych. Wynika to z faktu, że w kolumnie tej wystepują jedynie wartości "premium" oraz braki danych. Możemy więc założyć, iż brakujące obserwacje, to tak naprawdę mieszkania "non-premium". Postepując w taki sposób, wyeliminujemy znaczną część braków danych.
+
+```{r non_premium}
+wynajem_pdst <- wynajem_pdst_raw
+wynajem_pdst$condition[is.na(wynajem_pdst$condition)] <- "non_premium"
+prop_miss(wynajem_pdst)
+```
+
+Jak widać z prawie 6,4% braków danych, tym sposobem mamy ich jedynie 3,8%
+
+```{r gdzie_na_duzo, echo=FALSE}
+vis_miss(wynajem_pdst, sort = TRUE)
+```
+
+Wiele braków danych, mamy również w m.in. materiałach budynku, roku budowy, formie własności mieszkania oraz piętrze. Niestety tych wartości nie możemy w żaden sposób uzupełnić ręcznie. W nastepnych krokach posłużymy się imputacją
+
+```{r czestochowa_braki, echo=FALSE}
+gg_miss_fct(wynajem_pdst, fct = city) #braki w zaleznosci od miasta
+```
+
+Co ciekawe, najwięcej braków pod kątem roku budowy występuję w Częstochowie, co może być spowodowane tym, że jest to miasto z dużą liczba starszych budynków, w których to przypadku rok budowy często jest niezanany lub też pomijany przez właścicieli w ogłoszeniach.
+
+## Obserwacje odstające
+
+```{r boxploty_odstajace, eval=FALSE, include=FALSE}
+boxplot(wynajem_pdst$squareMeters)
+boxplot(wynajem_pdst$rooms)
+boxplot(wynajem_pdst$floor)
+boxplot(wynajem_pdst$floorCount)
+boxplot(wynajem_pdst$buildYear)
+boxplot(wynajem_pdst$latitude)
+boxplot(wynajem_pdst$longitude)
+boxplot(wynajem_pdst$centreDistance)
+boxplot(wynajem_pdst$poiCount)
+boxplot(wynajem_pdst$schoolDistance)
+boxplot(wynajem_pdst$clinicDistance)
+boxplot(wynajem_pdst$postOfficeDistance)
+boxplot(wynajem_pdst$kindergartenDistance)
+boxplot(wynajem_pdst$restaurantDistance)
+boxplot(wynajem_pdst$collegeDistance)
+boxplot(wynajem_pdst$pharmacyDistance)
+boxplot(wynajem_pdst$price)
+```
+
+```{r odstajace_min_max, echo=TRUE}
+summary(wynajem_pdst)
+```
+
+Zarówno stworzenie boxplotów dla danych oraz zbadanie ich za pomocą wartości minimalnych i maksymalnych, nie wykazało żadnych znaczących obserwacji odstających.
+
+```{r city_odstajace, echo=TRUE}
+unique(wynajem_pdst$city)
+```
+
+Również przy sprawdzaniu miast widzimy, że nie ma żadnej odstającej/niepoprawnie zapisanej wartości.
+
+## Walidacja danych 
+
+```{r reguly, include=FALSE}
+reguly <- editset(c(
+  "price>0",
+  "pharmacyDistance>0",
+  "collegeDistance>0",
+  "restaurantDistance>0",
+  "kindergartenDistance>0",
+  "postOfficeDistance>0",
+  "clinicDistance>0",
+  "schoolDistance>0",
+  "floorCount>=0",
+  "centreDistance>0",
+  "floor>=0",
+  "rooms>0",
+  "squareMeters>0",
+  "buildYear>0",
+  "poiCount>=0",
+  "latitude>=0",
+  "longitude>=0"
+))
+```
+
+```{r walidacja, echo=TRUE}
+summary(violatedEdits(reguly,wynajem_pdst))
+bledy <- violatedEdits(reguly,wynajem_pdst)
+plot(bledy)
+```
+
+Po zwalidowaniu danych nie występują żadne błędy, co oznacza, że możemy przejśc do ich imputacji
+
+## Imputacja danych
+
+```{r imputacja}
+library(VIM)
+czyste_dane <- hotdeck(wynajem_pdst)
+```
+
+Upewniamy się, czy po imputacji na pewno nie mamy żadnych braków danych, czy wszystko zadziałało poprawnie.
+
+```{r sprawdzenie_imput, echo=TRUE}
+n_miss(czyste_dane)
+```
+
+```{r wykres_imput, echo=FALSE}
+vis_miss(czyste_dane)
+```
+
+```{r zapisane_czyste, include=FALSE}
+write.csv(czyste_dane, "oczyszczone_dane.csv", row.names = FALSE)
+```
+
+# *Wizualizacja danych* 
