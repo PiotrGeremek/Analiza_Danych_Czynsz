@@ -41,8 +41,35 @@ library(moments)
 library(ggstatsplot)
 ```
 
-# *Wstęp*
+# *Wprowadzenie*
 
 ## Opis problemu
 
-działa git
+Celem raportu jest analiza czynników wpływających na wysokość czynszu w największych polskich miastach oraz porównanie kosztów najmu w różnych województwach. Analiza pozwoli określić, gdzie czynsze są najwyższe i najniższe oraz co wpływa na ich wysokość. Dodatkowo, raport będzie zawierał wizualizacje ukazujące zależności pomiędzy czynszem a poszczególnymi zmiennymi, co pozwoli na lepsze zrozumienie mechanizmów kształtujących rynek wynajmu nieruchomości w Polsce.
+
+## Dane
+
+```{r wczytywanie_danych, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+wynajem_pdst <- read.csv("apartments_rent_pl_2024_06.csv")
+```
+
+Podstawą naszej analizy będzie obszerna baza danych dotycząca mieszkań na wynajem, która zawiera szczegółowe informacje o poszczególnych ofertach.
+
+Nasza baza danych obejmuje takie informacje jak:
+
+-   **Lokalizacja** – miasto, współrzędne geograficzne (szerokość i długość geograficzna), oraz odległość od centrum.
+
+-   **Charakterystyka mieszkania** – typ budynku (np. blok mieszkalny, kamienica), powierzchnia w metrach kwadratowych, liczba pokoi, piętro oraz liczba pięter w budynku.
+
+-   **Rok budowy** – informacja o wieku budynku, jeśli jest dostępna.
+
+-   **Bliskość infrastruktury** – odległość od ważnych punktów usługowych, takich jak szkoły, przychodnie, urzędy pocztowe, przedszkola, restauracje, uczelnie i apteki.
+
+-   **Standard i wyposażenie** – stan mieszkania (np. premium, do remontu), materiał budynku, obecność parkingu, balkonu, windy, ochrony oraz komórki lokatorskiej.
+
+-   **Forma własności** – np. mieszkanie własnościowe, spółdzielcze.
+
+-   **Cena wynajmu** – czynsz podany w złotych.
+
+# *Standaryzacja i przygotowanie danych do analizy*
