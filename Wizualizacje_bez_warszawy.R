@@ -8,7 +8,7 @@ library(plotly)
 
 dane_do_wiz <- dane_do_wiz %>%
   mutate(  
-    hasParkingspace = ifelse(hasParkingSpace == "yes", TRUE, FALSE),  
+    hasParkingSpace = ifelse(hasParkingSpace == "yes", TRUE, FALSE),  
     hasBalcony = ifelse(hasBalcony == "yes", TRUE, FALSE),  
     hasElevator = ifelse(hasElevator == "yes", TRUE, FALSE),  
     hasSecurity = ifelse(hasSecurity == "yes", TRUE, FALSE),
