@@ -217,7 +217,7 @@ Na początku zamieniamy wartości "yes", "no", w przypadku niektórych zmiennych
 dane_do_wiz <- read.csv("oczyszczone_dane.csv")
 dane_do_wiz <- dane_do_wiz %>%
   mutate(  
-    hasParkingspace = ifelse(hasParkingSpace == "yes", TRUE, FALSE),  
+    hasParkingSpace = ifelse(hasParkingSpace == "yes", TRUE, FALSE),  
     hasBalcony = ifelse(hasBalcony == "yes", TRUE, FALSE),  
     hasElevator = ifelse(hasElevator == "yes", TRUE, FALSE),  
     hasSecurity = ifelse(hasSecurity == "yes", TRUE, FALSE),
