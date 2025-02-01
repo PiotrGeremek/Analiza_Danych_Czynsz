@@ -156,7 +156,7 @@ unique(wynajem_pdst$city)
 
 Również przy sprawdzaniu miast widzimy, że nie ma żadnej odstającej/niepoprawnie zapisanej wartości.
 
-## Walidacja danych 
+## Walidacja danych
 
 ```{r reguly, include=FALSE}
 reguly <- editset(c(
@@ -209,4 +209,377 @@ vis_miss(czyste_dane)
 write.csv(czyste_dane, "oczyszczone_dane.csv", row.names = FALSE)
 ```
 
-# *Wizualizacja danych* 
+# *Wizualizacja danych*
+
+Na początku zamieniamy wartości "yes", "no", w przypadku niektórych zmiennych na TRUE i FALSE, co ułatwi nam interpretacje wykresów
+
+```{r true_false, echo=TRUE}
+dane_do_wiz <- read.csv("oczyszczone_dane.csv")
+dane_do_wiz <- dane_do_wiz %>%
+  mutate(  
+    hasParkingspace = ifelse(hasParkingSpace == "yes", TRUE, FALSE),  
+    hasBalcony = ifelse(hasBalcony == "yes", TRUE, FALSE),  
+    hasElevator = ifelse(hasElevator == "yes", TRUE, FALSE),  
+    hasSecurity = ifelse(hasSecurity == "yes", TRUE, FALSE),
+    hasStorageRoom = ifelse(hasStorageRoom == "yes", TRUE, FALSE)
+  )
+```
+
+## Wszystkie miasta
+
+```{r histogram_cena_all, echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(dane_do_wiz, aes(x = price)) +
+  geom_histogram(binwidth = 500, fill = "blue", color = "black") +
+  xlim(0, 12500) +
+  labs(title = "Histogram Ceny wynajmu mieszkań", x = "Cena wynajmu", y = "Liczba mieszkań")
+```
+
+Tworząc histogram **ceny wynajmu** mieszkań dla wszystkich miast, możemy zauważyć, iż **większość ofert** wynajmy mieszkań koncentruje się **w przedziale 1800-3800 PLN**. Tanie mieszkania (do 1800 PLN) są rzadkością. W przedziale powyżej 3800 PLN, liczba ofert stopniowo maleje
+
+```{r cena_od_miasta, echo=FALSE}
+ggplot(dane_do_wiz, aes(x = city, y = price)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  labs(
+    title = "Cena wynajmu mieszkań w zależności od miasta",
+    x = "Miasto",
+    y = "Cena wynajmu"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Można jednak zauważyć, że dla Warszawy widoczna jest znacząca różnica w medianie i rozkładzie cen wynajmu, w porównaniu do pozostałych miast.
+
+Dodatkowo w **Warszawie** występuje **duża liczba wartości odstających**, co wskazuje na obecność bardzo drogich mieszkań na wynajem, co może być związane z luksusowymi apartamentami, prestiżowymi lokalizacjami oraz większym zróżnicowaniem ofert w stolicy.
+
+Oznacza to, że **włączenie Warszawy do wspólnej analizy** z innymi miastami **może zaburzać ogólne wnioski**, ponieważ podnosi wartości statystyczne, takie jak średnia, mediana i kwartyle. Może to prowadzić do błędnej interpretacji rynku wynajmu w pozostałych miastach, sugerując wyższe ceny niż rzeczywistość.
+
+Dlatego, aby uzyskać bardziej reprezentatywne wyniki, konieczne jest **oddzielne przeanalizowanie** Warszawy oraz pozostałych miast.
+
+## Bez Warszawy
+
+```{r bez_wwa, include=FALSE}
+dane_do_wiz_bez_wwa <- dane_do_wiz %>%
+  filter(city != "warszawa")
+```
+
+```{r bez_wwa_his, echo=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = price)) +
+  geom_histogram(binwidth = 500, fill = "blue", color = "black") +
+  labs(title = "Histogram Ceny wynajmu mieszkań", x = "Cena wynajmu", y = "Liczba mieszkań")
+```
+
+Widać, że **po usunięciu Warszawy** z analizy, przedział cen za wynajem prezentuje się inaczej. Większośc ofert koncentruje się teraz **w przedziale 1250-3500 PLN.** Wystepuje większa liczba tanich mieszkań, a z kolei ceny za mieszkania powyżej 7500 PLN są praktycznie niespotykane.
+
+```{r bezwwa, echo=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = city, y = price)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  labs(
+    title = "Cena wynajmu mieszkań w zależności od miasta",
+    x = "Miasto",
+    y = "Cena wynajmu"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Widzimy, że **najwyższe ceny wynajmu mieszkań są w Gdynii, Krakowie, Gdańsku i Wrocławiu**. Wynikają one z lokalnych czynników, takich jak atrakcyjność miasta, popyt na luksusowe nieruchomości i ograniczona podaż.
+
+Co ciekawe, w przypadku Krakowa, Pozania oraz Wrocławia widzimy najwięcej odstających wartości co sugeruje, iż w tych miastach jest widoczna **przepaść między standardowymi, a luksusowymi mieszkaniami**. Rynek nieruchomości w tych miastach jest silnie zróżnicowany.
+
+**Luksusowe mieszkania** są skierowane do zamożniejszych najemców, którzy są gotowi płacić więcej za lokalizację, standard i udogodnienia.
+
+**Standardowe mieszkania** są dostępne dla szerszego grona najemców, ale ich ceny są znacznie niższe, co tworzy wyraźną różnicę między segmentami rynku.
+
+### Liczba pokoi
+
+```{r pokoje_bezwwa, echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = as.factor(rooms), y = price)) +
+  geom_boxplot(fill = "orange", color = "black") +
+  labs(title = "Cena wynajmu a liczba pokoi", x = "Liczba pokoi", y = "Cena wynajmu")
+```
+
+```{r cena_pokoje_bezwwa, echo=FALSE, message=FALSE, warning=FALSE}
+avg_price_by_rooms <- dane_do_wiz_bez_wwa %>%
+  group_by(rooms) %>%
+  summarise(mean_price = mean(price, na.rm = TRUE))
+ggplot(avg_price_by_rooms, aes(x = rooms, y = mean_price)) +
+  geom_line(color = "blue", size = 1) +
+  geom_point(color = "red", size = 3) +
+  labs(
+    title = "Średnia Cena wynajmu mieszkań w zależności od liczby pokoi",
+    x = "Liczba pokoi",
+    y = "Średnia Cena wynajmu"
+  ) +
+  theme_minimal()
+```
+
+Głownym wnioskiem jest oczywisty fakt, **iż wynajem mieszkań z większą liczbą pokoi jest droższy**. Dodatkowo można zauważyć, że dla mieszkań z 2+ pokojami ceny są bardzo zróżnicowane, co widać po szerokości pudełek i ilości wartości odstających (np. luksusowe mieszkania)
+
+### Powierzchnia
+
+```{r powierzchnia_bezwwa, echo=FALSE, message=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = squareMeters, y = price)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  geom_smooth(method = "loess", color = "red", se = TRUE) +
+  labs(
+    title = "Cena wynajmu w zależności od powierzchni mieszkania (z linią trendu)",
+    x = "Powierzchnia mieszkania (m²)",
+    y = "Cena wynajmu"
+  ) +
+  theme_minimal()
+```
+
+Linia trendu na wykresie wskazuje na ogólną tendencję wzrostową ceny wynajmu wraz ze wzrostem powierzchni mieszkania. Oznacza to, że **większe mieszkania mają zazwyczaj wyższe ceny wynajmu.**
+
+```{r cenawyzszametraz_bezwwa, echo=FALSE}
+dane_do_wiz_bez_wwa_m2 <- dane_do_wiz_bez_wwa %>%
+  mutate(size_bins = cut(squareMeters, breaks = c(0, 30, 60, 90, 120, Inf),
+                         labels = c("0-30", "31-60", "61-90", "91-120", "120+")))
+
+ggplot(dane_do_wiz_bez_wwa_m2, aes(x = size_bins, y = price)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(
+    title = "Cena wynajmu w przedziałach powierzchni mieszkania",
+    x = "Przedziały powierzchni (m²)",
+    y = "Cena wynajmu"
+  ) +
+  theme_minimal()
+```
+
+```{r podzial_powierchnia_bezwwa, echo=FALSE, message=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = squareMeters, y = price)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  facet_wrap(~city) +
+  geom_smooth(method = "lm", color = "red", se = TRUE) +
+  labs(
+  title = "Cena wynajmu w zależności od powierzchni mieszkania dla różnych miast",
+  x = "Powierzchnia mieszkania (m²)",
+  y = "Cena wynajmu"
+) +
+  theme_minimal()
+```
+
+Powyższe wykresy przedstawiające cenę wynajmu mieszkania, w zależności od powierzchni, wraz z linią trendu, dla konkretnych miast, powierdzają, iż **w każdym z miast cena rośnie wraz ze wzrostem powierzchni mieszkania**.
+
+Co ciekawe, wykres ten pozwala nam zaobserwować **jak różnią się metraże mieszkań w każdym z miast**. I tak np. w Radomiu praktycznie nie występują miesta powyżej 75 m2, natomiast w Krakowie powierzchnie mieszkań dochodzą nawet do 150 m2.
+
+### Typ budynku
+
+```{r typbudynku_bezwwa, echo=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = price)) +
+  geom_histogram(binwidth = 500, fill = "blue", color = "black", alpha = 0.6) +
+  facet_wrap(~ type) +
+  labs(title = "Rozkład cen według typu budynku", x = "Cena wynajmu", y = "Liczba mieszkań")
+```
+
+Na postawie histogramów dla konkretnych typów budynków, możemy zauważyć, iż ceny wynajmu nie różnią się znacząco. **Najwięcej droższych mieszkań to budynki apartamentowe**, co wynika z ich wysokiego standardu oraz z reguły wielu udogodnień. Co ciekawe, widać bardzo dużą różnice w liczbie konkretnych typów budynków. **Najwięcej jest bloków mieszkalnych**, co może wynikać z faktu, iż były masowo budowane w XX wieku, są tańsze w konstrukcji i zawierają dużą liczbę mieszkań w jednym budynku. Z kolei **kamienic jest najmniej**, ponieważ są to starsze budynki, a ich liczba jest ograniczona ze względów historycznych i przestrzennych.
+
+### Balkon
+
+```{r balkon_bezwwa, echo=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = as.factor(hasBalcony), y = price)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(title = "Cena wynajmu a dostępność balkonu", x = "Czy jest balkon?", y = "Cena wynajmu") +
+  coord_flip()
+```
+
+Można zauważyć, iż **ceny wynajmu mieszkań, które posiadają balkon, są delikatnie większe**, niż mieszkań bez balkonów.
+
+### Parking
+
+```{r parking_bezwwa, echo=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = as.factor(hasParkingSpace), y = price)) +
+  geom_boxplot(fill = "cyan") +
+  labs(title = "Cena wynajmu a dostępność parkingu", x = "Czy jest parking?", y = "Cena wynajmu") +
+  coord_flip()
+```
+
+Podobnie ma się sprawa w przypadku parkingu. **Mieszkania, które zapewniają miejsce parkingowe są droższe** od tych niezapewniających parkingu.
+
+```{r paktingimiasta_bezwwa, echo=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = city, fill = as.factor(hasParkingSpace))) +
+  geom_bar(position = "fill") +
+  scale_fill_brewer(palette = "Set3") +
+  labs(
+    title = "Dostępność parkingu w różnych miastach",
+    x = "Miasto",
+    y = "Procent mieszkań",
+    fill = "Czy jest parking"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Na powyższym wykresie możemy zaobserwować dostępność parkingów w mieszkaniach w zależności od miasta. Co ciekawe **w Częstochowie oraz Gdynii mniej niż 1/5 mieszkań oferuje miejsce parkingowe**
+
+### Winda
+
+```{r winda_bezwwa, echo=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = as.factor(hasElevator), y = price)) +
+  geom_boxplot(fill = "cyan") +
+  labs(title = "Cena wynajmu a dostępność windy", x = "Czy jest winda?", y = "Cena wynajmu") +
+  coord_flip()
+```
+
+Również winda ma wpływ na cenę mieszkania. **Budynki z windą są droższe**, od tych bez niej
+
+### Ochrona
+
+```{r ochrona_bezwwa, echo=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = as.factor(hasSecurity), y = price)) +
+  geom_boxplot(fill = "cyan") +
+  labs(title = "Cena wynajmu a istnienie ochrony", x = "Czy jest ochrona?", y = "Cena wynajmu") +
+  coord_flip()
+```
+
+Również **obecnośc ochrony w budynku, wpływa na wyższą cenę wynajmu.**
+
+### Piwnica
+
+```{r piwnica_bezwwa, echo=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = as.factor(hasStorageRoom), y = price)) +
+  geom_boxplot(fill = "cyan") +
+  labs(title = "Cena wynajmu a dostępność piwnicy", x = "Czy jest piwnica?", y = "Cena wynajmu") +
+  coord_flip()
+```
+
+Co ciekawe, w przypadku piwnicy, to **mieszkania bez niej, z reguły są droższe od mieszkań z piwnicą.** Może to wynikać z faktu, iż w nowych inwestycjach piwnice są często pomijane na rzecz innych rozwiązań, takich jak dodatkowe miejsca parkingowe lub wspólne przestrzenie rekreacyjne, a takie budynki, jak już zauważyliśmy wcześniej, są zazwyczaj droższe od starych kamienic.
+
+### Wszystkie dodatkowe udogodnienia
+
+```{r udogodnienia_bezwwa, echo=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = interaction(hasBalcony, hasParkingSpace, hasElevator, hasSecurity, hasStorageRoom), y = price)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(
+    title = "Cena wynajmu a cechy mieszkania (balkon, parking, winda, ochrona, piwnica)",
+    x = "Cecha mieszkania",
+    y = "Cena wynajmu"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Wykres prezentuje wszystkie możliwe **kombinacje dodatkowych udogodnień** w mieszkaniach. Dzięki niemu możemy nawuażyć, że tak naprawdę, **żadna z nich nie ma znaczącego wpływu na cenę mieszkania**
+
+### Stan mieszkania
+
+```{r stanmieszkania_bezwwa, echo=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = condition, y = price)) +
+  geom_boxplot(fill = "salmon") +
+  labs(title = "Cena wynajmu a stan mieszkania", x = "Stan mieszkania", y = "Cena wynajmu") + 
+  coord_flip()
+```
+
+Oczywiście **im wyższy standard mieszkania, tym wyższa cena wynajmu.**
+
+### Materiał budynku
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = buildingMaterial, y = price)) +
+  geom_boxplot(fill = "grey") +
+  labs(title = "Cena wynajmu a materiał budynku", x = "Materiał budynku", y = "Cena wynajmu") +
+  coord_flip()
+```
+
+Co ciekawe, **budynki zbudowane z cegły są z reguły droższe od tych z płyt betonowych**. Może to wynikać z różnych czynników. Budynki z cegły są często lepiej utrzymane i mają wyższy standard wykończenia, co wpływa na wyższą cenę wynajmu. Dodatkowo są często postrzegane jako bardziej prestiżowe i trwałe, co również może wpływać na cenę.
+
+### Odległość od centrum
+
+```{r odl_miasta_bezwwa, echo=FALSE, message=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = centreDistance, y = price, color = city)) +
+  geom_smooth(method = "loess", se = FALSE) +
+  labs(
+    title = "Cena wynajmu a odległość od centrum w różnych miastach",
+    x = "Odległość od centrum (km)",
+    y = "Cena wynajmu",
+    color = "Miasto"
+  ) +
+  theme_minimal()
+```
+
+Wykres pokazuje, że **ceny wynajmu są najwyższe w centrach miast** i spadają wraz z odległością od centrum.
+
+Różnice w cenach między centrum a obrzeżami są najbardziej wyraźne w dużych miastach, takich jak Gdynia, Katowice, Gdańsk, niż w mniejszych miastach, takich jak Bydgoszcz czy Lublin.
+
+Co ciekawe, na wykresie możemy zaobserwować **odstające punkty** lub też **zupełnie odwrotną tendencję (np. Łódź)**, gdzie im dalej od centrum, tym wyższe ceny. Odchylenia te mogą wskazywać na specyficzne lokalizacje lub luksusowe osiedla, które mają wyższe ceny niż typowe mieszkania w danej odległości od centrum.
+
+### Piętro
+
+```{r pietro1_bezwwa, echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = factor(floor), y = price)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(
+    title = "Cena wynajmu w zależności od piętra",
+    x = "Piętro",
+    y = "Cena wynajmu"
+  ) +
+  theme_minimal()
+```
+
+```{r pietro2_bezwwa, echo=FALSE, message=FALSE, warning=FALSE}
+avg_price_floor <- dane_do_wiz_bez_wwa %>%
+  group_by(floor) %>%
+  summarise(mean_price = mean(price, na.rm = TRUE))
+
+ggplot(avg_price_floor, aes(x = floor, y = mean_price)) +
+  geom_line(color = "darkgreen", size = 1) +
+  geom_point(color = "orange", size = 2) +
+  labs(
+    title = "Średnia Cena wynajmu w zależności od piętra",
+    x = "Piętro",
+    y = "Średnia Cena wynajmu"
+  ) +
+  theme_minimal()
+```
+
+Jeśli chodzi o wypływ piętra na cenę wynajmu mieszkania, to możemy zauważyć, że **ceny wynajmu są silnie zależne od piętra**, ale trend nie jest liniowy.
+
+-   **Do 5 piętra** ceny za mieszkanie rosną, co może wynikać z atrakcyjności tych pięter dla najemców (nie są za nisko - mniejsze ryzyko kradzieży, ale również nie są za wysoko co może wydłużać czas dotarcia na piętro)
+
+-   **Piętra 5-11** tracą na atrakcyjności, z powodu właśnie omówionego wyżej utrudnienia związanego z dłuższym czasem dotarcia do mieszkania, czy też uciążliwości w przypadku braku/awarii windy.
+
+-   Ceny za **piętra 12 i wyżej** są najwyższe, co może wynikaż z faktu, iż często sa one postrzegane jako luksusowe. Są skierowane do zamożniejszych najemców, którzy są gotowi zapłacić więcej za wyjątkowe widoki, prywatność i prestiż. Dodatkowo, tak wysokie piętra nie występują z reguły w starych kamieniacach czy blokach, a w apartamentowcach, które oferują wyższy standard i to właśnie to, może być przyczyna wyższych cen wynajmu.
+
+```{r pietra_histogram_bezwwa, echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(dane_do_wiz_bez_wwa, aes(x = factor(floor))) +
+  geom_histogram(stat = "count", fill = "skyblue", color = "black") +
+  labs(
+    title = "Liczba ofert mieszkań na piętrze",
+    x = "Piętro",
+    y = "Liczba mieszkań"
+  ) +
+  theme_minimal()
+```
+
+Powyższy wykres potwierdza, jak niewiele mieszkań znajduje się na piętrach 11 i wyżej
+
+### Korelacja
+
+```{r korelacja_bezwwa, echo=FALSE}
+ggcorr(
+  data = dane_do_wiz_bez_wwa %>% select(where(is.numeric)),
+  method = c("pairwise.complete.obs", "pearson"),
+  label = TRUE
+) +
+  theme(
+    axis.text.x = element_text(hjust = 1),  # Przesunięcie etykiet na osi X
+    axis.text.y = element_text(hjust = 1)   # Przesunięcie etykiet na osi Y
+  )
+```
+
+Tylko dwie zmienne – **liczba pokoi (rooms)** i **powierzchnia (squareMeters)** – wykazują **silną korelację (dodatnią) z ceną wynajmu**.
+
+Większość pozostałych zmiennych nie wykazuje silnej korelacji ani dodatniej, ani ujemnej z ceną. Oznacza to, że wpływ tych czynników na cenę jest mniej znaczący lub bardziej złożony.
+
+**Zmienne opisujące odległość od różnych obiektów** (np. restaurantDistance, schoolDistance, parkDistance) są **mocno skorelowane między sobą.** Oznacza to, że jeśli mieszkanie jest blisko jednego obiektu (np. restauracji), prawdopodobnie jest też blisko innych (np. szkoły czy parku).
+
+## Warszawa
+
+potem warszawka jakies ciekawe zaleznosci (sama cena ze duzo srendich i potem od razu przeskok na bardzo wysokie ceny, na penwo odleglosc od centrum jak zalezy cena ze mocno widac ze im blizej tym drozsze)
+
+wnioski podusmowania:
+
+warszwa mocno odstajaca wiec osobno analizujemy
+
+no na pewno ze najwiekszy wplyw na cene ma lokalizacja i odkleglosc od centrum. udogodnienia nie maja znaczacego. Pietra ze rosnie do ktoregos ale za wysokie tez nizsze ceny i potem luksusowe
