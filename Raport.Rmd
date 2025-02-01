@@ -230,7 +230,6 @@ dane_do_wiz <- dane_do_wiz %>%
 ```{r histogram_cena_all, echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(dane_do_wiz, aes(x = price)) +
   geom_histogram(binwidth = 500, fill = "blue", color = "black") +
-  xlim(0, 12500) +
   labs(title = "Histogram Ceny wynajmu mieszkań", x = "Cena wynajmu", y = "Liczba mieszkań")
 ```
 
@@ -576,10 +575,256 @@ Większość pozostałych zmiennych nie wykazuje silnej korelacji ani dodatniej,
 
 ## Warszawa
 
-potem warszawka jakies ciekawe zaleznosci (sama cena ze duzo srendich i potem od razu przeskok na bardzo wysokie ceny, na penwo odleglosc od centrum jak zalezy cena ze mocno widac ze im blizej tym drozsze)
+```{r warszawka, include=FALSE}
+dane_do_wiz_wwa <- dane_do_wiz %>%
+  filter(city == "warszawa")
+```
+
+```{r historgram_wwwa, echo=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = price)) +
+  geom_histogram(binwidth = 500, fill = "blue", color = "black") +
+  labs(title = "Histogram Ceny wynajmu mieszkań", x = "Cena wynajmu", y = "Liczba mieszkań")
+```
+
+Widzimy, że rozkład ceny wynajmu mieszkań w Warszawie jest już znacznie szerszy. **Ceny dochodzą nawet do 20000 PLN.**
+
+### Liczba pokoi
+
+```{r pokoje)wwa, echo=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = as.factor(rooms), y = price)) +
+  geom_boxplot(fill = "orange", color = "black") +
+  labs(title = "Cena wynajmu a liczba pokoi", x = "Liczba pokoi", y = "Cena wynajmu")
+```
+
+```{r pokoje_wwa_2, echo=FALSE, message=FALSE, warning=FALSE}
+avg_price_by_rooms <- dane_do_wiz_wwa %>%
+  group_by(rooms) %>%
+  summarise(mean_price = mean(price, na.rm = TRUE))
+ggplot(avg_price_by_rooms, aes(x = rooms, y = mean_price)) +
+  geom_line(color = "blue", size = 1) +
+  geom_point(color = "red", size = 3) +
+  labs(
+    title = "Średnia Cena wynajmu mieszkań w zależności od liczby pokoi",
+    x = "Liczba pokoi",
+    y = "Średnia Cena wynajmu"
+  ) +
+  theme_minimal()
+```
+
+### Powierzchnia
+
+```{r powierzchnia_wwa, echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = squareMeters, y = price)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  geom_smooth(method = "loess", color = "red", se = TRUE) +
+  labs(
+    title = "Cena wynajmu w zależności od powierzchni mieszkania (z linią trendu)",
+    x = "Powierzchnia mieszkania (m²)",
+    y = "Cena wynajmu"
+  ) +
+  theme_minimal()
+```
+
+```{r powiechnia_wwa_2, echo=FALSE, message=FALSE, warning=FALSE}
+dane_do_wiz_wwa_m2 <- dane_do_wiz_wwa %>%
+  mutate(size_bins = cut(squareMeters, breaks = c(0, 30, 60, 90, 120, Inf),
+                         labels = c("0-30", "31-60", "61-90", "91-120", "120+")))
+
+ggplot(dane_do_wiz_wwa_m2, aes(x = size_bins, y = price)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(
+    title = "Cena wynajmu w przedziałach powierzchni mieszkania",
+    x = "Przedziały powierzchni (m²)",
+    y = "Cena wynajmu"
+  ) +
+  theme_minimal()
+```
+
+### Typ budynku
+
+```{r wyp_budynku_wwa, echo=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = price)) +
+  geom_histogram(binwidth = 500, fill = "blue", color = "black", alpha = 0.6) +
+  facet_wrap(~ type) +
+  labs(title = "Rozkład cen według typu budynku", x = "Cena wynajmu", y = "Liczba mieszkań")
+```
+
+Zależnośći w przypadku wpływu liczby pokoi, powierzchni oraz typu budynku na cene wynajmu, kształtują się w Warszawie pododbnie jak w pozostałych polskich miastach.\
+Jedyna zaobserwowana znacząca różnica, to widoczna przewaga w liczbie bloków mieszkaniowych. Dodatkowo co ciekawe w ich przypadku **bardzo mocno dominuje jeden konkretny przedział cenowy,** co może wynikać z podobnego standardu mieszkań oraz dużej podaży mieszkań w blokach, co utrzymuje ceny na podobnym poziomie.
+
+### Balkon
+
+```{r balkon_wwa, echo=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = as.factor(hasBalcony), y = price)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(title = "Cena wynajmu a dostępność balkonu", x = "Czy jest balkon?", y = "Cena wynajmu") +
+  coord_flip()
+```
+
+### Parking
+
+```{r parking_wwa, echo=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = as.factor(hasParkingSpace), y = price)) +
+  geom_boxplot(fill = "cyan") +
+  labs(title = "Cena wynajmu a dostępność parkingu", x = "Czy jest parking?", y = "Cena wynajmu") +
+  coord_flip()
+```
+
+```{r paringile_wwa, echo=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = city, fill = as.factor(hasParkingSpace))) +
+  geom_bar(position = "fill") +
+  scale_fill_brewer(palette = "Set3") +
+  labs(
+    title = "Dostępność parkingu w Warszawie",
+    x = "Miasto",
+    y = "Procent mieszkań",
+    fill = "Czy jest parking"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### Winda
+
+```{r winda_wwa, echo=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = as.factor(hasElevator), y = price)) +
+  geom_boxplot(fill = "cyan") +
+  labs(title = "Cena wynajmu a dostępność windy", x = "Czy jest winda?", y = "Cena wynajmu") +
+  coord_flip()
+```
+
+### Ochrona
+
+```{r ochorna_wwa, echo=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = as.factor(hasSecurity), y = price)) +
+  geom_boxplot(fill = "cyan") +
+  labs(title = "Cena wynajmu a istnienie ochrony", x = "Czy jest ochrona?", y = "Cena wynajmu") +
+  coord_flip()
+```
+
+**Dostęp do balkonu, parkingu, ochrony oraz windy**, również w przypadku Warszawy wpływa na cenę mieszkania, jednak **wpływ ten jest znacznie mniejszy** niż w przypadku pozostałych polskich miast.
+
+### Piwnica
+
+```{r piwnica_wwa, echo=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = as.factor(hasStorageRoom), y = price)) +
+  geom_boxplot(fill = "cyan") +
+  labs(title = "Cena wynajmu a dostępność piwnicy", x = "Czy jest piwnica?", y = "Cena wynajmu") +
+  coord_flip()
+```
+
+Tak samo jak w przypadku innych miast, odwrotnie niż w przypadku innych udogodnień, mieszkania bez piwnicy są droższe. Jednak ponownie, udogodnienie to ma dużo mniejszy wpływ na cenę.
+
+### Stan mieszkania
+
+```{r tanmieskzania_wwa, echo=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = condition, y = price)) +
+  geom_boxplot(fill = "salmon") +
+  labs(title = "Cena wynajmu a stan mieszkania", x = "Stan mieszkania", y = "Cena wynajmu") + 
+  coord_flip()
+```
+
+Co ciekawe również **standard mieszkania w przypadku Warszawy nie ma aż tak znaczącego wpływu na cenę**. Duży popyt na wynajem w stolicy sprawia, że nawet przeciętne lub słabej jakości mieszkania osiągają wysokie ceny, co różni się od sytuacji w innych miastach, gdzie standard ma większe znaczenie.
+
+### Materiał budynku
+
+```{r material_wwa, echo=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = buildingMaterial, y = price)) +
+  geom_boxplot(fill = "grey") +
+  labs(title = "Cena wynajmu a materiał budynku", x = "Materiał budynku", y = "Cena wynajmu") +
+  coord_flip()
+```
+
+### Odległość od centrum
+
+```{r centrum_wwa, echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = centreDistance, y = price, color = city)) +
+  geom_smooth(method = "loess", se = FALSE) +
+  labs(
+    title = "Cena wynajmu a odległość od centrum w Warszawie",
+    x = "Odległość od centrum (km)",
+    y = "Cena wynajmu",
+    color = "Miasto"
+  ) +
+  theme_minimal()
+```
+
+W przypadku Warszawy zauważalna jest **silna zależność między odległością od centrum a ceną wynajmu mieszkań** – im dalej od śródmieścia, tym niższe ceny.
+
+Jest to charakterystyczny trend dla stolicy, gdzie centralne lokalizacje osiągają najwyższe ceny, niezależnie od standardu mieszkania. Wynika to z prestiżu, dogodnej komunikacji, bliskości biurowców oraz dostępu do szerokiej infrastruktury. W miarę oddalania się od centrum, ceny stopniowo maleją.
+
+### Piętro
+
+```{r pietrko_ww1, echo=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = factor(floor), y = price)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(
+    title = "Cena wynajmu w zależności od piętra",
+    x = "Piętro",
+    y = "Cena wynajmu"
+  ) +
+  theme_minimal()
+```
+
+```{r pietro_wwa_2, echo=FALSE, message=FALSE, warning=FALSE}
+avg_price_floor <- dane_do_wiz_wwa %>%
+  group_by(floor) %>%
+  summarise(mean_price = mean(price, na.rm = TRUE))
+
+ggplot(avg_price_floor, aes(x = floor, y = mean_price)) +
+  geom_line(color = "darkgreen", size = 1) +
+  geom_point(color = "orange", size = 2) +
+  labs(
+    title = "Średnia Cena wynajmu w zależności od piętra",
+    x = "Piętro",
+    y = "Średnia Cena wynajmu"
+  ) +
+  theme_minimal()
+```
+
+**Zależność ceny wynajmu od piętra w przypadku Warszawy prezentuje się trochę inaczej niż w pozostałych miastach**. Tutaj najbardziej wyróżniającym się pod względem ceny jest piętro 16, na którym to są najdroższe mieszkania Nie widać, aż tak wielkich róznic w cenach na piętrach 0-11. Dopiero od piętra 11 do 15 widoczny jest lekki spadek cen.
+
+```{r wyzszepietra_wwa, echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(dane_do_wiz_wwa, aes(x = factor(floor))) +
+  geom_histogram(stat = "count", fill = "skyblue", color = "black") +
+  labs(
+    title = "Liczba ofert mieszkań na piętrze",
+    x = "Piętro",
+    y = "Liczba mieszkań"
+  ) +
+  theme_minimal()
+```
+
+Można zauważyć też, że **występuje znacznie więcej mieszkań na piętrach 11 i wyższych**
+
+### Korelacja
+
+```{r korelacja_waa, echo=FALSE}
+ggcorr(
+  data = dane_do_wiz_wwa %>% select(where(is.numeric)),
+  method = c("pairwise.complete.obs", "pearson"),
+  label = TRUE
+) +
+  theme(
+    axis.text.x = element_text(hjust = 1),  # Przesunięcie etykiet na osi X
+    axis.text.y = element_text(hjust = 1)   # Przesunięcie etykiet na osi Y
+  )
+```
+
+Ponownie tylko dwie zmienne – **liczba pokoi (rooms)** i **powierzchnia (squareMeters)** – wykazują **silną korelację (dodatnią) z ceną wynajmu**.
+
+Większość pozostałych zmiennych nie wykazuje silnej korelacji ani dodatniej, ani ujemnej z ceną. Zmienne opisujące odległość od różnych obiektów (np. restaurantDistance, schoolDistance, parkDistance) są mocno skorelowane między sobą.
+
+# *Statystyki opisowe*
+
+# *Wnioskowanie statystyczne*
+
+# *Podsumowanie*
 
 wnioski podusmowania:
 
 warszwa mocno odstajaca wiec osobno analizujemy
 
 no na pewno ze najwiekszy wplyw na cene ma lokalizacja i odkleglosc od centrum. udogodnienia nie maja znaczacego. Pietra ze rosnie do ktoregos ale za wysokie tez nizsze ceny i potem luksusowe
+
+w warszawce wszystko ma mniejszy wplyw bo taki popyt duzy
