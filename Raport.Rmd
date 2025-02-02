@@ -101,7 +101,7 @@ Warto sprawdzić, w przypadku jakiej zmiennej występuję najwięcej braków
 miss_var_summary(wynajem_pdst_raw)
 ```
 
-Jak widać, w "condition" wystepuje aż 71,5% braków danych. Wynika to z faktu, że w kolumnie tej wystepują jedynie wartości "premium" oraz braki danych. Możemy więc założyć, iż brakujące obserwacje, to tak naprawdę mieszkania "non-premium". Postepując w taki sposób, wyeliminujemy znaczną część braków danych.
+Jak widać, w "condition" występuje aż 71,5% braków danych. Wynika to z faktu, że w kolumnie tej występują jedynie wartości "premium" oraz braki danych. Możemy więc założyć, iż brakujące obserwacje, to tak naprawdę mieszkania "non-premium". Postepując w taki sposób, wyeliminujemy znaczną część braków danych.
 
 ```{r non_premium}
 wynajem_pdst <- wynajem_pdst_raw
@@ -269,7 +269,7 @@ ggplot(dane_do_wiz_bez_wwa, aes(x = price)) +
   labs(title = "Histogram Ceny wynajmu mieszkań", x = "Cena wynajmu", y = "Liczba mieszkań")
 ```
 
-Widać, że **po usunięciu Warszawy** z analizy, przedział cen za wynajem prezentuje się inaczej. Większośc ofert koncentruje się teraz **w przedziale 1250-3500 PLN.** Wystepuje większa liczba tanich mieszkań, a z kolei ceny za mieszkania powyżej 7500 PLN są praktycznie niespotykane.
+Widać, że **po usunięciu Warszawy** z analizy, przedział cen za wynajem prezentuje się inaczej. Większośc ofert koncentruje się teraz **w przedziale 1250-3500 PLN.** Występuje większa liczba tanich mieszkań, a z kolei ceny za mieszkania powyżej 7500 PLN są praktycznie niespotykane.
 
 ```{r bezwwa, echo=FALSE}
 ggplot(dane_do_wiz_bez_wwa, aes(x = city, y = price)) +
@@ -283,7 +283,7 @@ ggplot(dane_do_wiz_bez_wwa, aes(x = city, y = price)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Widzimy, że **najwyższe ceny wynajmu mieszkań są w Gdynii, Krakowie, Gdańsku i Wrocławiu**. Wynikają one z lokalnych czynników, takich jak atrakcyjność miasta, popyt na luksusowe nieruchomości i ograniczona podaż.
+Widzimy, że **najwyższe ceny wynajmu mieszkań są w Gdyni, Krakowie, Gdańsku i Wrocławiu**. Wynikają one z lokalnych czynników, takich jak atrakcyjność miasta, popyt na luksusowe nieruchomości i ograniczona podaż.
 
 Co ciekawe, w przypadku Krakowa, Pozania oraz Wrocławia widzimy najwięcej odstających wartości co sugeruje, iż w tych miastach jest widoczna **przepaść między standardowymi, a luksusowymi mieszkaniami**. Rynek nieruchomości w tych miastach jest silnie zróżnicowany.
 
@@ -411,7 +411,7 @@ ggplot(dane_do_wiz_bez_wwa, aes(x = city, fill = as.factor(hasParkingSpace))) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Na powyższym wykresie możemy zaobserwować dostępność parkingów w mieszkaniach w zależności od miasta. Co ciekawe **w Częstochowie oraz Gdynii mniej niż 1/5 mieszkań oferuje miejsce parkingowe**
+Na powyższym wykresie możemy zaobserwować dostępność parkingów w mieszkaniach w zależności od miasta. Co ciekawe **w Częstochowie oraz Gdyni mniej niż 1/5 mieszkań oferuje miejsce parkingowe**
 
 ### Winda
 
@@ -539,7 +539,7 @@ Jeśli chodzi o wypływ piętra na cenę wynajmu mieszkania, to możemy zauważy
 
 -   **Piętra 5-11** tracą na atrakcyjności, z powodu właśnie omówionego wyżej utrudnienia związanego z dłuższym czasem dotarcia do mieszkania, czy też uciążliwości w przypadku braku/awarii windy.
 
--   Ceny za **piętra 12 i wyżej** są najwyższe, co może wynikaż z faktu, iż często sa one postrzegane jako luksusowe. Są skierowane do zamożniejszych najemców, którzy są gotowi zapłacić więcej za wyjątkowe widoki, prywatność i prestiż. Dodatkowo, tak wysokie piętra nie występują z reguły w starych kamieniacach czy blokach, a w apartamentowcach, które oferują wyższy standard i to właśnie to, może być przyczyna wyższych cen wynajmu.
+-   Ceny za **piętra 12 i wyżej** są najwyższe, co może wynikać z faktu, iż często sa one postrzegane jako luksusowe. Są skierowane do zamożniejszych najemców, którzy są gotowi zapłacić więcej za wyjątkowe widoki, prywatność i prestiż. Dodatkowo, tak wysokie piętra nie występują z reguły w starych kamieniacach czy blokach, a w apartamentowcach, które oferują wyższy standard i to właśnie to, może być przyczyna wyższych cen wynajmu.
 
 ```{r pietra_histogram_bezwwa, echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(dane_do_wiz_bez_wwa, aes(x = factor(floor))) +
@@ -871,10 +871,10 @@ kalkulacje_stat <- function(data, group_var) {
     rename(group_value = {{ group_var }} )
 }
 
-
 print(kalkulacje_stat(dane_do_statystyk,), n = Inf, width = Inf)
-#Zdecydowaliśmy się dodatkowo nie komplikować wyświetlanych wyników grupując po dodatkowym warunku, gdyż wyniki byłyby zbyt obszerne
 ```
+
+Zdecydowaliśmy się dodatkowo nie komplikować wyświetlanych wyników grupując po dodatkowym warunku, gdyż wyniki byłyby zbyt obszerne
 
 ## Wnioski
 
@@ -882,14 +882,11 @@ Warszawa zdecydowanie wyróżnia się na tle innych miast, średnia cena (5090) 
 
 Inne miasta również w niektórych aspektach zaskakują - ciekawie prezentuje się **wysoka kurtoza** dla Krakowa (7.00), Gdańska (6.22), Poznania (6.59) oraz Wrocławia (6.22) **która wskazuje na "spiętrzenie" cen wokół mediany** – rynek może być skoncentrowany na klasie średniej.
 
-
 Warszawa (36.2%), Gdynia (29.3%) i Katowice (27.3%) **mają najwyższą zmienność w ujęciu rozstępu międzykwartylowego**. Szczecin (13.5%), Radom (16%) i Wrocław (17.2%) to rynki o **najmniejszych wahaniach cen w środkowej części rozkładu**.
 
-
-**Najniższe ceny** wystąpiły w Radomiu (średnia 1851), dodatkowo **jako jedyne analizowane miasto** wykazało _**ujemną**_ skośność (-0.0827) Oznacza to, że większość ofert jest droższa od średniej.
+**Najniższe ceny** wystąpiły w Radomiu (średnia 1851), dodatkowo **jako jedyne analizowane miasto** wykazało ***ujemną*** skośność (-0.0827) Oznacza to, że większość ofert jest droższa od średniej.
 
 W przypadku Katowic **zidentyfikowano wysoki współczynnik zmienności** (45.6%) – rynek może być **mocno zróżnicowany** (np. stare kamienice vs. nowe inwestycje).
-
 
 # *Wnioskowanie statystyczne*
 
@@ -911,7 +908,7 @@ Hipoteza zerowa (H0): Nie ma różnicy w cenach między miastami.
 
 Hipoteza alternatywna (HA): Istnieje różnica w cenach między miastami.
 
-Biorąc pod uwagę ekstremalnie niską wartość p (1.99e-296), mamy mocne dowody na odrzucenie hipotezy zerowej (H0). To oznacza, że istnieje istotna statystycznie różnica w cenach między miastami.
+Biorąc pod uwagę ekstremalnie niską wartość p (1.99e-296), mamy mocne dowody na odrzucenie hipotezy zerowej (H0). To oznacza, że **istnieje istotna statystycznie różnica w cenach między miastami.**
 
 ```{r wniosk_stat_2, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 suppressMessages(suppressWarnings({gghistostats(
@@ -929,8 +926,7 @@ Hipoteza zerowa (H0): Posiadanie windy nie wpływa na cenę mieszkania.
 
 Hipoteza alternatywna (HA): Posiadanie windy wpływa na cenę mieszkania.
 
-Biorąc pod uwagę ekstremalnie niską wartość p (0.00), mamy mocne dowody na odrzucenie hipotezy zerowej (H0). To oznacza, że posiadanie windy ma istotny statystycznie wpływ na cenę mieszkania.
-
+Biorąc pod uwagę ekstremalnie niską wartość p (0.00), mamy mocne dowody na odrzucenie hipotezy zerowej (H0). **To oznacza, że posiadanie windy ma istotny statystycznie wpływ na cenę mieszkania.**
 
 ```{r wniosk_stat_3, echo=FALSE}
 ggscatterstats(
@@ -947,7 +943,7 @@ Hipoteza zerowa (H0): Nie ma korelacji między ceną mieszkań a ich metrażem.
 
 Hipoteza alternatywna (HA): Istnieje korelacja między ceną mieszkań a ich metrażem.
 
-Biorąc pod uwagę ekstremalnie niską wartość p (0.00) oraz wysoki współczynnik korelacji (0.78), mamy mocne dowody na odrzucenie hipotezy zerowej (H0). To oznacza, że istnieje istotna statystycznie korelacja między ceną mieszkań a ich metrażem.
+Biorąc pod uwagę ekstremalnie niską wartość p (0.00) oraz wysoki współczynnik korelacji (0.78), mamy mocne dowody na odrzucenie hipotezy zerowej (H0). **To oznacza, że istnieje istotna statystycznie korelacja między ceną mieszkań a ich metrażem.**
 
 ```{r wniosk_stat_4, echo=FALSE}
 gghistostats(
@@ -964,7 +960,7 @@ Hipoteza zerowa (H0): Materiał budowlany nie wpływa na cenę mieszkania.
 
 Hipoteza alternatywna (HA): Materiał budowlany wpływa na cenę mieszkania.
 
-Biorąc pod uwagę ekstremalnie niską wartość p (0.00), mamy mocne dowody na odrzucenie hipotezy zerowej (H0). To oznacza, że materiał, z którego zbudowano budynek, ma istotny statystycznie wpływ na cenę mieszkania.
+Biorąc pod uwagę ekstremalnie niską wartość p (0.00), mamy mocne dowody na odrzucenie hipotezy zerowej (H0). **To oznacza, że materiał, z którego zbudowano budynek, ma istotny statystycznie wpływ na cenę mieszkania.**
 
 ```{r wniosk_stat_5, echo=FALSE}
 ggbetweenstats(
@@ -982,15 +978,30 @@ Hipoteza zerowa (H0): Stan mieszkania nie wpływa na jego cenę.
 
 Hipoteza alternatywna (HA): Stan mieszkania wpływa na jego cenę.
 
-Biorąc pod uwagę wysoką wartość p (0.56) oraz zerową wielkość efektu (𝜂𝑝2=0.00), nie mamy dowodów na odrzucenie hipotezy zerowej (H0). To oznacza, że stan mieszkania nie ma istotnego statystycznie wpływu na jego cenę.
-
+Biorąc pod uwagę wysoką wartość p (0.56) oraz zerową wielkość efektu (𝜂𝑝2=0.00), nie mamy dowodów na odrzucenie hipotezy zerowej (H0). **To oznacza, że stan mieszkania nie ma istotnego statystycznie wpływu na jego cenę.**
 
 # *Podsumowanie*
 
-wnioski podusmowania:
+W trakcie analizy przeszliśmy przez kilka istotnych etapów. Na początku załadowaliśmy dane i dokonaliśmy ich wstępnej eksploracji. Sprawdziliśmy, czy nie brakuje wartości, a także czy zmienne mają poprawne formaty. Następnie przeprowadziliśmy czyszczenie danych, aby uniknąć błędów w dalszej analizie.
 
-warszwa mocno odstajaca wiec osobno analizujemy
+Potem przeszliśmy do wizualizacji danych oraz analizy statystycznej, co pomogło nam dostrzec kluczowe wzorce i zależności. W dalszej części sprawdziliśmy różne modele i testy statystyczne, aby zweryfikować, które czynniki mają realny wpływ na ceny mieszkań.
 
-no na pewno ze najwiekszy wplyw na cene ma lokalizacja i odkleglosc od centrum. udogodnienia nie maja znaczacego. Pietra ze rosnie do ktoregos ale za wysokie tez nizsze ceny i potem luksusowe
+## **Wnioski z analizy:**
 
-w warszawce wszystko ma mniejszy wplyw bo taki popyt duzy
+1.  **Warszawa znacząco odstaje od reszty miast**, dlatego zdecydowaliśmy się analizować ją osobno. Popyt na mieszkania w stolicy jest na tyle duży, że wiele czynników, które mają duże znaczenie w innych miastach, w Warszawie odgrywa mniejszą rolę.
+
+2.  **Najdroższe miasta poza Warszawą to Kraków, Wrocław i Gdańsk**. Te rynki charakteryzują się wysokimi cenami mieszkań, choć nadal są one niższe niż w stolicy.
+
+3.  **Największy wpływ na cenę ma lokalizacja oraz odległość od centrum**. Im bliżej ścisłego centrum, tym ceny są wyższe, a różnice mogą być bardzo duże. To potwierdza, że w kontekście rynku nieruchomości lokalizacja pozostaje kluczowym czynnikiem.
+
+4.  **Udogodnienia w budynku (np. winda, monitoring, miejsce parkingowe) nie mają znaczącego wpływu na cenę**. Okazuje się, że kupujący lub wynajmujący kierują się przede wszystkim lokalizacją, a dodatkowe udogodnienia nie podbijają cen tak bardzo, jak można by się spodziewać.
+
+5.  **Piętro ma wpływ na cenę, ale nie jest to zależność liniowa**. Ceny rosną wraz z wysokością, ale tylko do pewnego momentu – w bardzo wysokich budynkach mieszkania na najwyższych piętrach potrafią być tańsze niż te na średnich kondygnacjach. Wyjątkiem są luksusowe apartamenty na ostatnich piętrach, które mają znacząco wyższe ceny.
+
+6.  **Powierzchnia mieszkania oraz liczba pokoi mają istotny wpływ na cenę, ale zależność nie jest wprost proporcjonalna**. Cena za metr kwadratowy spada wraz ze wzrostem powierzchni, co oznacza, że większe mieszkania są relatywnie tańsze w przeliczeniu na jednostkę powierzchni niż kawalerki. Liczba pokoi również wpływa na cenę – mieszkania dwupokojowe są często bardziej atrakcyjne niż kawalerki, ale powyżej trzech pokoi różnice cenowe się wypłaszczają.
+
+7.  **Typ budynku ma znaczenie – mieszkania w nowym budownictwie są wyraźnie droższe niż w starych blokach**. Budynki z wielkiej płyty mają niższe ceny niż nowoczesne apartamentowce, a kamienice mogą mieć zarówno bardzo wysokie, jak i niskie ceny w zależności od standardu i lokalizacji.
+
+8.  **W Warszawie wpływ poszczególnych czynników jest słabszy niż w innych miastach**. Ogromny popyt sprawia, że ceny są wysokie niemal w każdej lokalizacji, a czynniki takie jak piętro czy udogodnienia mają mniejsze znaczenie niż gdzie indziej.
+
+9.  **Zidentyfikowaliśmy pewne niespodziewane wzorce**, np. w niektórych lokalizacjach ceny wydają się niższe, niż wynikałoby to z odległości od centrum. Może to oznaczać, że istnieją dodatkowe czynniki wpływające na ceny, które nie zostały uwzględnione w modelu, np. hałas, infrastruktura czy prestiż danej okolicy.
