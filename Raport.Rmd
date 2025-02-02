@@ -14,7 +14,7 @@ output:
 #Instalacja pakietów 
 
 options(repos = c(CRAN = "https://cloud.r-project.org/"))
-install.packages(c("rmdformats", "tidyverse", "dlookr", "editrules", "VIM", "deducorrect", "ISLR", "naniar", "visdat", "Amelia", "validate", "ggplot2", "mice", "finalfit", "GGally", "dplyr", "plotly", "gtsummary", "glue", "arsenal", "qwraps2", "table1", "moments", "ggstatsplot"))
+install.packages(c("rmdformats", "tidyverse", "dlookr", "editrules", "VIM", "deducorrect", "ISLR", "naniar", "visdat", "Amelia", "validate", "ggplot2", "mice", "finalfit", "GGally", "dplyr", "plotly", "gtsummary", "glue", "arsenal", "qwraps2", "table1", "moments", "ggstatsplot","viridis"))
 library(rmdformats)
 library(tidyverse)
 library(dlookr)
@@ -39,6 +39,7 @@ library(qwraps2)
 library(table1)
 library(moments)
 library(ggstatsplot)
+library(viridis)
 ```
 
 # *Wprowadzenie*
@@ -817,7 +818,172 @@ Większość pozostałych zmiennych nie wykazuje silnej korelacji ani dodatniej,
 
 # *Statystyki opisowe*
 
+```{r statystyki_opisowe, include=FALSE}
+dane_do_statystyk <- dane_do_wiz %>%
+  mutate(  
+    hasParkingSpace = ifelse(hasParkingSpace == "yes", TRUE, FALSE),  
+    hasBalcony = ifelse(hasBalcony == "yes", TRUE, FALSE),  
+    hasElevator = ifelse(hasElevator == "yes", TRUE, FALSE),  
+    hasSecurity = ifelse(hasSecurity == "yes", TRUE, FALSE),
+    hasStorageRoom = ifelse(hasStorageRoom == "yes", TRUE, FALSE)
+  ) %>%
+  select(-contains("_imp"))
+
+dane_do_statystyk$id <- as.factor(dane_do_statystyk$id)
+
+categorical_vars <- c("city", "type", "ownership", "buildingMaterial", "condition")
+
+dane_do_statystyk[categorical_vars] <- lapply(dane_do_statystyk[categorical_vars], as.factor)
+
+numeric_vars <- c("squareMeters", "rooms", "floor", "floorCount", "buildYear", 
+                  "latitude", "longitude", "centreDistance", "poiCount", 
+                  "schoolDistance", "clinicDistance", "postOfficeDistance", 
+                  "kindergartenDistance", "restaurantDistance", "collegeDistance", 
+                  "pharmacyDistance", "price")
+
+dane_do_statystyk[numeric_vars] <- lapply(dane_do_statystyk[numeric_vars], as.numeric)
+```
+
+```{r stat_opis, echo=TRUE}
+kalkulacje_stat <- function(data, group_var) {
+  data %>%
+    group_by(city, {{ group_var }} ) %>%
+    summarise(
+      n = n(),
+      średnia = mean(price, na.rm = TRUE),
+      mediana = median(price, na.rm = TRUE),
+      odch_std = sd(price, na.rm = TRUE),
+      wariancja = var(price, na.rm = TRUE),
+      coeff_var = (odch_std / średnia) * 100,
+      skośność = skewness(price, na.rm = TRUE),
+      kurtoza = kurtosis(price, na.rm = TRUE),
+      IQR = IQR(price, na.rm = TRUE),
+      sx = IQR / 2,
+      coeff_varx = (sx / mediana) * 100,
+      min = min(price, na.rm = TRUE),
+      max = max(price, na.rm = TRUE),
+      q10 = quantile(price, 0.1, na.rm = TRUE),
+      q25 = quantile(price, 0.25, na.rm = TRUE),
+      q50 = quantile(price, 0.5, na.rm = TRUE),
+      q75 = quantile(price, 0.75, na.rm = TRUE),
+      q95 = quantile(price, 0.95, na.rm = TRUE)
+    ) %>%
+    rename(group_value = {{ group_var }} )
+}
+
+
+print(kalkulacje_stat(dane_do_statystyk,), n = Inf, width = Inf)
+#Zdecydowaliśmy się dodatkowo nie komplikować wyświetlanych wyników grupując po dodatkowym warunku, gdyż wyniki byłyby zbyt obszerne
+```
+
+## Wnioski
+
+Warszawa zdecydowanie wyróżnia się na tle innych miast, średnia cena (5090) **jest niemal 2x wyższa niż w większości miast**, Mediana (4000) **jest znacząco niższa od średniej, co sugeruje obecność wysokich outlierów**, odchylenie standardowe (2974) i współczynnik zmienności (58.4%) **wskazują, że ceny w Warszawie są wyjątkowo różnorodne.**
+
+Inne miasta również w niektórych aspektach zaskakują - ciekawie prezentuje się **wysoka kurtoza** dla Krakowa (7.00), Gdańska (6.22), Poznania (6.59) oraz Wrocławia (6.22) **która wskazuje na "spiętrzenie" cen wokół mediany** – rynek może być skoncentrowany na klasie średniej.
+
+
+Warszawa (36.2%), Gdynia (29.3%) i Katowice (27.3%) **mają najwyższą zmienność w ujęciu rozstępu międzykwartylowego**. Szczecin (13.5%), Radom (16%) i Wrocław (17.2%) to rynki o **najmniejszych wahaniach cen w środkowej części rozkładu**.
+
+
+**Najniższe ceny** wystąpiły w Radomiu (średnia 1851), dodatkowo **jako jedyne analizowane miasto** wykazało _**ujemną**_ skośność (-0.0827) Oznacza to, że większość ofert jest droższa od średniej.
+
+W przypadku Katowic **zidentyfikowano wysoki współczynnik zmienności** (45.6%) – rynek może być **mocno zróżnicowany** (np. stare kamienice vs. nowe inwestycje).
+
+
 # *Wnioskowanie statystyczne*
+
+```{r wniosk_stat_1, echo=FALSE}
+suppressMessages(suppressWarnings({ggbetweenstats(
+  data = dane_do_statystyk,
+  x = city,
+  y = price,
+  type = "parametric",
+  title = "czy cena się różni między miastami",
+  palette = "Set1"
+)
+}))
+```
+
+Ten model sprawdza, czy istnieje istotna statystycznie różnica w cenach między różnymi miastami.\
+
+Hipoteza zerowa (H0): Nie ma różnicy w cenach między miastami.
+
+Hipoteza alternatywna (HA): Istnieje różnica w cenach między miastami.
+
+Biorąc pod uwagę ekstremalnie niską wartość p (1.99e-296), mamy mocne dowody na odrzucenie hipotezy zerowej (H0). To oznacza, że istnieje istotna statystycznie różnica w cenach między miastami.
+
+```{r wniosk_stat_2, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+suppressMessages(suppressWarnings({gghistostats(
+  data = dane_do_statystyk,
+  x = price,
+  grouping.var = hasElevator,
+  title = "czy posiadanie windy wpływa na cenę mieszkania"
+)
+}))
+```
+
+Ten model sprawdza, czy posiadanie windy wpływa na cenę mieszkania.
+
+Hipoteza zerowa (H0): Posiadanie windy nie wpływa na cenę mieszkania.
+
+Hipoteza alternatywna (HA): Posiadanie windy wpływa na cenę mieszkania.
+
+Biorąc pod uwagę ekstremalnie niską wartość p (0.00), mamy mocne dowody na odrzucenie hipotezy zerowej (H0). To oznacza, że posiadanie windy ma istotny statystycznie wpływ na cenę mieszkania.
+
+
+```{r wniosk_stat_3, echo=FALSE}
+ggscatterstats(
+  data = dane_do_statystyk,
+  x = squareMeters,
+  y = price,
+  title = "cena vs metraż mieszkania"
+)
+```
+
+Ten model sprawdza zależność między ceną mieszkań a ich metrażem.
+
+Hipoteza zerowa (H0): Nie ma korelacji między ceną mieszkań a ich metrażem.
+
+Hipoteza alternatywna (HA): Istnieje korelacja między ceną mieszkań a ich metrażem.
+
+Biorąc pod uwagę ekstremalnie niską wartość p (0.00) oraz wysoki współczynnik korelacji (0.78), mamy mocne dowody na odrzucenie hipotezy zerowej (H0). To oznacza, że istnieje istotna statystycznie korelacja między ceną mieszkań a ich metrażem.
+
+```{r wniosk_stat_4, echo=FALSE}
+gghistostats(
+  data = dane_do_statystyk,
+  x = price,
+  grouping.var = buildingMaterial,
+  title = "Czy materiał, z którego zbudowano budynek, wpływa na cenę mieszkania?"
+)
+```
+
+Ten model sprawdza, czy materiał, z którego zbudowano budynek, wpływa na cenę mieszkania.
+
+Hipoteza zerowa (H0): Materiał budowlany nie wpływa na cenę mieszkania.
+
+Hipoteza alternatywna (HA): Materiał budowlany wpływa na cenę mieszkania.
+
+Biorąc pod uwagę ekstremalnie niską wartość p (0.00), mamy mocne dowody na odrzucenie hipotezy zerowej (H0). To oznacza, że materiał, z którego zbudowano budynek, ma istotny statystycznie wpływ na cenę mieszkania.
+
+```{r wniosk_stat_5, echo=FALSE}
+ggbetweenstats(
+  data = dane_do_statystyk,
+  x = condition,
+  y = price,
+  type = "parametric",
+  title = "Wpływ stanu mieszkania na cenę"
+)
+```
+
+Ten model sprawdza wpływ stanu mieszkania na jego cenę.
+
+Hipoteza zerowa (H0): Stan mieszkania nie wpływa na jego cenę.
+
+Hipoteza alternatywna (HA): Stan mieszkania wpływa na jego cenę.
+
+Biorąc pod uwagę wysoką wartość p (0.56) oraz zerową wielkość efektu (𝜂𝑝2=0.00), nie mamy dowodów na odrzucenie hipotezy zerowej (H0). To oznacza, że stan mieszkania nie ma istotnego statystycznie wpływu na jego cenę.
+
 
 # *Podsumowanie*
 

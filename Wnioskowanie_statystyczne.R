@@ -7,6 +7,7 @@ dane_do_statystyk<- read.csv("dane_do_statystyk.csv")
 library(ggstatsplot)
 library(ggplot2)
 library(dplyr)
+library(viridis)
 
 # Load dataset
 df <- dane_do_statystyk  # Assuming the dataset is named `dane_do_statystyk`
